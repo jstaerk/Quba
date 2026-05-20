@@ -58,6 +58,10 @@ import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.layout.Layout
 import kotlinx.coroutines.Job
@@ -85,6 +89,8 @@ import de.openindex.zugferd.manager.theme.LocalQubaTypography
 import de.openindex.zugferd.manager.utils.stringResource
 import de.openindex.zugferd.manager.utils.title
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectMessage
+import de.openindex.zugferd.quba.generated.resources.AppVisualisationEmptyHint
+import de.openindex.zugferd.quba.generated.resources.AppVisualisationEmptyTitle
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationNoXml
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationViewCode
 import de.openindex.zugferd.quba.generated.resources.AppVisualisationViewPdf
@@ -686,39 +692,51 @@ private fun CurrentTabContent(
 
 @Composable
 private fun EmptyVisualsView(state: VisualsSectionState) {
-    val scope = rememberCoroutineScope()
-    val appState = LocalAppState.current
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        ElevatedCard(
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.widthIn(max = 380.dp),
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(horizontal = 32.dp, vertical = 28.dp),
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(104.dp)
+                    .drawBehind {
+                        drawRoundRect(
+                            color = colors.border,
+                            style = Stroke(
+                                width = 1.5.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f)),
+                            ),
+                            cornerRadius = CornerRadius(20.dp.toPx()),
+                        )
+                    },
             ) {
                 Icon(
                     imageVector = Icons.Default.Visibility,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(40.dp),
+                    tint = colors.accent,
+                    modifier = Modifier.size(48.dp),
                 )
+            }
 
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 Text(
-                    text = stringResource(Res.string.AppCheckSelectMessage),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    softWrap = true,
+                    text = stringResource(Res.string.AppVisualisationEmptyTitle),
+                    style = typo.bodyMed.copy(color = colors.text2),
+                )
+                Text(
+                    text = stringResource(Res.string.AppVisualisationEmptyHint),
+                    style = typo.small.copy(color = colors.text4),
                 )
             }
         }

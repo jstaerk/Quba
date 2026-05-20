@@ -26,6 +26,9 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 <resources>
     <string name="AppCreate">E-Rechnung aus „%1$s“ erstellen.</string>
 
+    <string name="AppCreateEmptyTitle">Rechnung erstellen</string>
+    <string name="AppCreateEmptyHint">PDF ablegen — oder klicken</string>
+
     <string name="AppCreateSelect">PDF wählen</string>
     <string name="AppCreateSelectInfo">Eine PDF-Rechnung zur Bearbeitung auswählen.</string>
     <string name="AppCreateSelectMessage">

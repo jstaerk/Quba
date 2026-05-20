@@ -26,6 +26,9 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 <resources>
     <string name="AppCreate">Créer une e-facture à partir de „%1$s“.</string>
 
+    <string name="AppCreateEmptyTitle">Créer une facture</string>
+    <string name="AppCreateEmptyHint">Déposer PDF — ou cliquer</string>
+
     <string name="AppCreateSelect">Selectionner PDF</string>                            <!-- kontextabhängig; könnte auch "choisir" sein -->
     <string name="AppCreateSelectInfo">Sélectionner une facture PDF à traiter.</string>
     <string name="AppCreateSelectMessage">

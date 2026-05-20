@@ -28,6 +28,9 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCheckPassed">La facture „%1$s“ est valide.</string>
     <string name="AppCheckFailed">La facture „%1$s“ est invalide.</string>
 
+    <string name="AppCheckEmptyTitle">Vérifier la facture</string>
+    <string name="AppCheckEmptyHint">Déposer PDF ou XML — ou cliquer</string>
+
     <string name="AppCheckSelect">Sélectionner la facture électronique</string>                     <!-- "Wählen" übersetzt im Sinne von "aus verschiedenen Optionen auswählen" -->
     <string name="AppCheckSelectInfo">Sélectionner une facture pour validation.</string>            <!-- alternativ: Sélectionner une facture pour la valider (eine RE auswählen, um sie zu prüfen) -->
     <string name="AppCheckSelectMessage">

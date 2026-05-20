@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.HorizontalDivider
@@ -55,7 +56,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import de.openindex.zugferd.manager.theme.LocalQubaColors
+import de.openindex.zugferd.manager.theme.LocalQubaTypography
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -137,6 +147,8 @@ import de.openindex.zugferd.quba.generated.resources.AppCreateItemsItemRemove
 import de.openindex.zugferd.quba.generated.resources.AppCreateItemsItemSummaryGross
 import de.openindex.zugferd.quba.generated.resources.AppCreateItemsItemSummaryNet
 import de.openindex.zugferd.quba.generated.resources.AppCreateItemsItemSummaryTax
+import de.openindex.zugferd.quba.generated.resources.AppCreateEmptyHint
+import de.openindex.zugferd.quba.generated.resources.AppCreateEmptyTitle
 import de.openindex.zugferd.quba.generated.resources.AppCreateSelect
 import de.openindex.zugferd.quba.generated.resources.AppCreateSelectInfo
 import de.openindex.zugferd.quba.generated.resources.AppCreateSelectMessage
@@ -331,22 +343,53 @@ fun CreateSectionActions(state: CreateSectionState) {
 @Composable
 @Suppress("UNUSED_PARAMETER")
 private fun EmptyView(state: CreateSectionState) {
-    Row(
-        modifier = Modifier
-            .fillMaxSize(),
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Request user to select a PDF file.
-            Text(
-                text = stringResource(Res.string.AppCreateSelectMessage),
-                textAlign = TextAlign.Center,
-                softWrap = true,
-            )
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(104.dp)
+                    .drawBehind {
+                        drawRoundRect(
+                            color = colors.border,
+                            style = Stroke(
+                                width = 1.5.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f)),
+                            ),
+                            cornerRadius = CornerRadius(20.dp.toPx()),
+                        )
+                    },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    tint = colors.accent,
+                    modifier = Modifier.size(48.dp),
+                )
+            }
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                Text(
+                    text = stringResource(Res.string.AppCreateEmptyTitle),
+                    style = typo.bodyMed.copy(color = colors.text2),
+                )
+                Text(
+                    text = stringResource(Res.string.AppCreateEmptyHint),
+                    style = typo.small.copy(color = colors.text4),
+                )
+            }
         }
     }
 }

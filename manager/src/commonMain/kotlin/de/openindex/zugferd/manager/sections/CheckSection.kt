@@ -89,7 +89,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size as GeometrySize
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -145,6 +148,8 @@ import de.openindex.zugferd.quba.generated.resources.AppCheckMessagesFilter
 import de.openindex.zugferd.quba.generated.resources.AppCheckMessagesFilterSeverity
 import de.openindex.zugferd.quba.generated.resources.AppCheckMessagesFilterType
 import de.openindex.zugferd.quba.generated.resources.AppCheckPassed
+import de.openindex.zugferd.quba.generated.resources.AppCheckEmptyHint
+import de.openindex.zugferd.quba.generated.resources.AppCheckEmptyTitle
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelect
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectInfo
 import de.openindex.zugferd.quba.generated.resources.AppCheckSelectMessage
@@ -259,41 +264,58 @@ fun CheckSectionActions(state: CheckSectionState) {
 
 /**
  * Empty view of the check section.
- * This is shown, if no PDF file was selected by the user.
+ * The whole area is already clickable + drag-and-drop — no verbose instructions needed.
  */
 @Composable
 @Suppress("UNUSED_PARAMETER")
 private fun EmptyView(state: CheckSectionState) {
+    val colors = LocalQubaColors.current
+    val typo = LocalQubaTypography.current
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        ElevatedCard(
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-            ),
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.widthIn(max = 380.dp),
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(horizontal = 32.dp, vertical = 28.dp),
+            // Drop-zone indicator: dashed rounded box with icon
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(104.dp)
+                    .drawBehind {
+                        drawRoundRect(
+                            color = colors.border,
+                            style = Stroke(
+                                width = 1.5.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 8f)),
+                            ),
+                            cornerRadius = CornerRadius(20.dp.toPx()),
+                        )
+                    },
             ) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(40.dp),
+                    tint = colors.accent,
+                    modifier = Modifier.size(48.dp),
                 )
+            }
 
+            // Minimal labels — file types + action hint
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 Text(
-                    text = stringResource(Res.string.AppCheckSelectMessage),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    softWrap = true,
+                    text = stringResource(Res.string.AppCheckEmptyTitle),
+                    style = typo.bodyMed.copy(color = colors.text2),
+                )
+                Text(
+                    text = stringResource(Res.string.AppCheckEmptyHint),
+                    style = typo.small.copy(color = colors.text4),
                 )
             }
         }

@@ -28,6 +28,9 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppVisualisationPassed">E-invoice „%1$s“ is valid.</string>
     <string name="AppVisualisationFailed">E-invoice „%1$s“ is invalid.</string>
 
+    <string name="AppVisualisationEmptyTitle">View invoice</string>
+    <string name="AppVisualisationEmptyHint">Drop PDF or XML — or click</string>
+
     <string name="AppVisualisationSelect">select e-invoice</string>
     <string name="AppVisualisationSelectInfo">Select an XML or PDF invoice for display.</string>
     <string name="AppVisualisationSelectMessage">

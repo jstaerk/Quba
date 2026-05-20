@@ -28,6 +28,9 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCheckPassed">E-Rechnung „%1$s“ ist gültig.</string>
     <string name="AppCheckFailed">E-Rechnung „%1$s“ ist ungültig.</string>
 
+    <string name="AppCheckEmptyTitle">Rechnung prüfen</string>
+    <string name="AppCheckEmptyHint">PDF oder XML ablegen — oder klicken</string>
+
     <string name="AppCheckSelect">E-Rechnung wählen</string>
     <string name="AppCheckSelectInfo">Eine E-Rechnung zur Prüfung auswählen.</string>
     <string name="AppCheckSelectMessage">

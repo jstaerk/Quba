@@ -26,6 +26,9 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 <resources>
     <string name="AppCreate">Create e-invoice from „%1$s“.</string>
 
+    <string name="AppCreateEmptyTitle">Create invoice</string>
+    <string name="AppCreateEmptyHint">Drop PDF — or click</string>
+
     <string name="AppCreateSelect">select PDF</string>
     <string name="AppCreateSelectInfo">Select a PDF to edit.</string>
     <string name="AppCreateSelectMessage">

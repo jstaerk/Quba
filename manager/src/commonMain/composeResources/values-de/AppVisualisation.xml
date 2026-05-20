@@ -33,6 +33,9 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
 
 
 
+    <string name="AppVisualisationEmptyTitle">Rechnung anzeigen</string>
+    <string name="AppVisualisationEmptyHint">PDF oder XML ablegen — oder klicken</string>
+
     <string name="AppVisualisationSelect">E-Rechnung auswählen</string>
 
     <string name="AppVisualisationSelectInfo">Wähle eine XML- oder PDF-Rechnung zur Darstellung aus.</string>

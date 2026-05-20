@@ -37,11 +37,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.border
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuOpen
+import androidx.compose.material.icons.filled.BrightnessAuto
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PowerSettingsNew
 import androidx.compose.foundation.Image
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
@@ -240,6 +246,9 @@ private fun AppNavigation() {
             onClick = { isExpanded = !isExpanded },
         )
 
+        // Theme mode toggle (Hell / Auto / Dunkel)
+        ThemeModeToggle(isExpanded = isExpanded)
+
         // Quit / Shutdown
         AppNavigationItem(
             label = Res.string.AppSidebarQuit,
@@ -356,4 +365,117 @@ private fun AppSectionNavigationItem(section: AppSection, isExpanded: Boolean) {
         isExpanded = isExpanded,
         onClick = { appState.setSection(section) },
     )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Theme mode quick-toggle
+// Expanded: 3-segment icon pill  (☀ Hell | 🖥 Auto | ☾ Dunkel)
+// Collapsed: single icon cycling Auto → Hell → Dunkel → Auto
+// ─────────────────────────────────────────────────────────────────────────────
+
+@Composable
+private fun ThemeModeToggle(isExpanded: Boolean) {
+    val preferences = LocalAppState.current.preferences
+    val colors = LocalQubaColors.current
+    val scope = rememberCoroutineScope()
+
+    fun setTheme(mode: Boolean?) {
+        preferences.setDarkMode(mode)
+        scope.launch { preferences.save() }
+    }
+
+    if (isExpanded) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(horizontal = 8.dp)
+                .fillMaxWidth()
+                .height(32.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .border(1.dp, colors.border, RoundedCornerShape(8.dp))
+                .background(colors.surface3),
+        ) {
+            ThemeSegment(
+                icon = Icons.Default.LightMode,
+                label = "Hell",
+                active = preferences.isThemeLight,
+                modifier = Modifier.weight(1f),
+                onClick = { setTheme(false) },
+            )
+            Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(colors.border))
+            ThemeSegment(
+                icon = Icons.Default.BrightnessAuto,
+                label = "Auto",
+                active = preferences.isThemeAuto,
+                modifier = Modifier.weight(1f),
+                onClick = { setTheme(null) },
+            )
+            Box(modifier = Modifier.width(1.dp).fillMaxHeight().background(colors.border))
+            ThemeSegment(
+                icon = Icons.Default.DarkMode,
+                label = "Dunkel",
+                active = preferences.isThemeDark,
+                modifier = Modifier.weight(1f),
+                onClick = { setTheme(true) },
+            )
+        }
+    } else {
+        val currentIcon = when {
+            preferences.isThemeLight -> Icons.Default.LightMode
+            preferences.isThemeDark  -> Icons.Default.DarkMode
+            else                     -> Icons.Default.BrightnessAuto
+        }
+        val nextMode: Boolean? = when {
+            preferences.isThemeAuto  -> false   // auto → hell
+            preferences.isThemeLight -> true    // hell → dunkel
+            else                     -> null    // dunkel → auto
+        }
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .width(56.dp)
+                .height(40.dp),
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(width = 40.dp, height = 36.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { setTheme(nextMode) },
+            ) {
+                Icon(
+                    imageVector = currentIcon,
+                    contentDescription = "Theme wechseln",
+                    tint = colors.text3,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThemeSegment(
+    icon: ImageVector,
+    label: String,
+    active: Boolean,
+    modifier: Modifier,
+    onClick: () -> Unit,
+) {
+    val colors = LocalQubaColors.current
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(7.dp))
+            .background(if (active) colors.accentSoft else Color.Transparent)
+            .clickable(onClick = onClick),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            tint = if (active) colors.accent else colors.text3,
+            modifier = Modifier.size(16.dp),
+        )
+    }
 }

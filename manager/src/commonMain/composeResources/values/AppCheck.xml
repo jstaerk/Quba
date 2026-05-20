@@ -28,6 +28,9 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppCheckPassed">E-invoice „%1$s“ is valid.</string>
     <string name="AppCheckFailed">E-invoice „%1$s“ is invalid.</string>
 
+    <string name="AppCheckEmptyTitle">Validate invoice</string>
+    <string name="AppCheckEmptyHint">Drop PDF or XML — or click</string>
+
     <string name="AppCheckSelect">select e-invoice</string>
     <string name="AppCheckSelectInfo">select e-invoice for validation.</string>
     <string name="AppCheckSelectMessage">
