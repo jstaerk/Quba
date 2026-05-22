@@ -146,6 +146,24 @@ fun VisualsSection(state: VisualsSectionState) {
         focusRequester.requestFocus()
     }
 
+    // Multi-file picker for empty-area click — same as the + button.
+    val emptyAreaLauncher = rememberFilePickerLauncher(
+        type = PickerType.File(extensions = listOf("pdf", "xml")),
+        mode = PickerMode.Multiple(),
+        title = "Dateien auswählen",
+        onResult = { files: List<PlatformFile>? ->
+            files?.forEach { file ->
+                scope.launch {
+                    try {
+                        state.addTabWithFile(file, appState)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        },
+    )
+
     // Current tab info — needed by title bar toggle and CurrentTabContent.
     val currentTab = state.documents.getOrNull(state.selectedIndex)
     val hasPdf = currentTab?.pdf != null
@@ -191,7 +209,7 @@ fun VisualsSection(state: VisualsSectionState) {
                 .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
                 .then(
                     if (state.documents.isEmpty())
-                        Modifier.clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } }
+                        Modifier.clickable { emptyAreaLauncher.launch() }
                     else Modifier
                 )
                 .dragAndDropTarget(

@@ -200,6 +200,20 @@ fun CheckSection(state: CheckSectionState) {
         )
     }
 
+    // Multi-file picker for empty-area click — same as the + button.
+    val emptyAreaLauncher = rememberFilePickerLauncher(
+        type = PickerType.File(extensions = listOf("pdf", "xml")),
+        mode = PickerMode.Multiple(),
+        title = "Dateien auswählen",
+        onResult = { files: List<PlatformFile>? ->
+            files?.forEach { file ->
+                scope.launch {
+                    state.selectFile(file = file, appState = appState)
+                }
+            }
+        },
+    )
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Tab strip — visible as soon as at least one document is open.
@@ -232,7 +246,7 @@ fun CheckSection(state: CheckSectionState) {
                 .fillMaxSize()
                 .then(
                     if (state.selectedTab == null)
-                        Modifier.clickable { scope.launch(Dispatchers.IO) { state.selectFile(appState) } }
+                        Modifier.clickable { emptyAreaLauncher.launch() }
                     else Modifier
                 )
                 .dragAndDropTarget(
