@@ -22,6 +22,8 @@
 package de.openindex.zugferd.manager.utils
 
 import de.openindex.zugferd.manager.APP_LOGGER
+import de.openindex.zugferd.manager.APP_TITLE_FULL
+import de.openindex.zugferd.manager.APP_VERSION
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,6 +36,7 @@ import org.apache.pdfbox.pdmodel.PDEmbeddedFilesNameTreeNode
 import org.apache.pdfbox.pdmodel.common.filespecification.PDComplexFileSpecification
 import org.apache.xmpbox.xml.DomXmpParser
 import org.apache.xmpbox.xml.XmpParsingException
+import org.mustangproject.ZUGFeRD.ZUGFeRDExporterFromA3
 import org.mustangproject.ZUGFeRD.ZUGFeRDExporterFromPDFA
 import org.mustangproject.ZUGFeRD.ZUGFeRDImporter
 import org.mustangproject.ZUGFeRD.ZUGFeRDVisualizer
@@ -41,6 +44,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.pathString
@@ -368,4 +372,73 @@ actual suspend fun getHtmlVisualizationFromPdf(pdf: PlatformFile): String? {
         tempXmlFile
     }
     return getHtmlVisualizationFromXML(tempXmlFile)
+}
+
+/**
+ * Renders [xml] to [target] via Mustang's own ZUGFeRDVisualizer PDF template — a paginated
+ * invoice document combining all sections (overview, line items, attachments, history, ...)
+ * with no interactive tab concept, unlike the app's HTML preview. The invoice XML is then
+ * embedded into that freshly rendered PDF (not any original source PDF) — unless the XML
+ * isn't embeddable this way (see [isEmbeddableAsZugferdXml]), in which case the plain
+ * rendered PDF is used as-is.
+ *
+ * The whole result is built in memory before writing to [target], so a failure never leaves
+ * behind a truncated/empty file at the target location.
+ *
+ * Note: the current Mustang version (2.21.0) has no language parameter for this PDF template —
+ * the output is always in German, regardless of the app's current language.
+ */
+suspend fun exportVisualizationAsPdf(xml: String, target: PlatformFile) {
+    withContext(Dispatchers.IO) {
+        val tempXml = File.createTempFile("quba_visual_export_", ".xml")
+        val tempPdf = File.createTempFile("quba_visual_export_", ".pdf")
+        try {
+            tempXml.writeText(xml, Charsets.UTF_8)
+            ZUGFeRDVisualizer().toPDF(tempXml.absolutePath, tempPdf.absolutePath)
+            val plainPdfBytes = tempPdf.readBytes()
+
+            val resultBytes = if (isEmbeddableAsZugferdXml(xml)) {
+                val buffer = java.io.ByteArrayOutputStream()
+                embedZugferdXmlIntoPdf(plainPdfBytes, xml, buffer)
+                buffer.toByteArray()
+            } else {
+                // ZUGFeRD/Factur-X XML embedding is only defined for CII-based XML (ZUGFeRD,
+                // Factur-X, XRechnung-CII, Order-X). UBL invoices use a different, PDF-independent
+                // e-invoice format that can't be embedded this way — Mustang's own XML provider
+                // would reject it with a RuntimeException — so we just keep the plain PDF.
+                APP_LOGGER.info("XML ist kein CII/ZUGFeRD-Format — PDF wird ohne eingebettete XML-Daten exportiert.")
+                plainPdfBytes
+            }
+
+            target.file.writeBytes(resultBytes)
+        } finally {
+            tempXml.delete()
+            tempPdf.delete()
+        }
+    }
+}
+
+/**
+ * Whether [xml] can be embedded into a PDF via [ZUGFeRDExporterFromA3.setXML] — mirrors the
+ * exact check Mustang's own `CustomXMLProvider.setXML()` performs internally, so this never
+ * drifts out of sync with what would actually be accepted.
+ */
+private fun isEmbeddableAsZugferdXml(xml: String): Boolean =
+    xml.contains("rsm:CrossIndustry") ||
+        xml.contains("rsm:SCRDMCCBDACIOMessageStructure") ||
+        xml.contains("SCRDMCCBDACIDAMessageStructure")
+
+/**
+ * Embeds raw ZUGFeRD/Factur-X XML into an arbitrary (not necessarily PDF/A) PDF.
+ * Uses [ZUGFeRDExporterFromA3] directly rather than [ZUGFeRDExporterFromPDFA],
+ * since the latter requires pre-existing PDF/A XMP metadata to detect the conformance
+ * level — which a freshly rendered PDF does not have.
+ */
+private fun embedZugferdXmlIntoPdf(pdfBytes: ByteArray, xml: String, output: OutputStream) {
+    ZUGFeRDExporterFromA3()
+        .load(pdfBytes)
+        .setProducer("$APP_TITLE_FULL $APP_VERSION")
+        .setCreator("$APP_TITLE_FULL $APP_VERSION")
+        .setXML(xml.toByteArray(Charsets.UTF_8))
+        .export(output)
 }

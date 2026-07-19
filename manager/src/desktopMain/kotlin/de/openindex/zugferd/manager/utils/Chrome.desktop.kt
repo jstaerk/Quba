@@ -26,14 +26,23 @@ import de.openindex.zugferd.manager.APP_LOGGER
 import de.openindex.zugferd.manager.AppInfo
 import de.openindex.zugferd.manager.AppSection
 import de.openindex.zugferd.manager._APP_STATE
+import de.openindex.zugferd.manager.sections.VisualsSectionState
+import de.openindex.zugferd.quba.generated.resources.AppVisualisationExportPdfContextMenu
+import de.openindex.zugferd.quba.generated.resources.Res
+import io.github.vinceglb.filekit.core.FileKit
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.cef.CefApp
 import org.cef.CefClient
 import org.cef.CefSettings
 import org.cef.browser.CefBrowser
 import org.cef.browser.CefRendering
+import org.cef.callback.CefMenuModel
 import org.cef.handler.CefAppHandlerAdapter
+import org.cef.handler.CefContextMenuHandlerAdapter
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.absolutePathString
@@ -82,6 +91,38 @@ private var CEF_APP: CefApp? = null
 private var CEF_CLIENT: CefClient? = null
 
 private var CEF_BROWSER: CefBrowser? = null
+
+private const val EXPORT_VISUALIZATION_PDF_COMMAND_ID = CefMenuModel.MenuId.MENU_ID_USER_FIRST
+
+private fun exportVisualizationPdfMenuLabel(): String =
+    runBlocking { getString(Res.string.AppVisualisationExportPdfContextMenu) }
+
+/**
+ * Renders the invoice XML of the currently active Visualisieren tab via Mustang's own
+ * PDF template (all sections combined, no tab bar — see [exportVisualizationAsPdf]),
+ * embeds the XML into it, and lets the user choose where to save the result.
+ */
+private fun exportCurrentVisualizationAsPdf() {
+    val tab = (AppSection.VISUALISATION.state as? VisualsSectionState)
+        ?.let { state -> state.documents.getOrNull(state.selectedIndex) }
+        ?: return
+    val xml = tab.xml ?: return
+    val suggestedName = tab.name.substringBeforeLast(".").ifBlank { "visualisierung" }
+
+    CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val targetFile = FileKit.saveFile(
+                bytes = null,
+                baseName = suggestedName,
+                extension = "pdf",
+            ) ?: return@launch
+
+            exportVisualizationAsPdf(xml, targetFile)
+        } catch (e: Exception) {
+            APP_LOGGER.error("Visualisierung konnte nicht als PDF exportiert werden.", e)
+        }
+    }
+}
 
 /** Maps attachment filename → (bytes, mimeType) in memory. Populated by postProcessHtmlForAttachments(). */
 val globalAttachmentData = mutableMapOf<String, Pair<ByteArray, String>>()
@@ -202,6 +243,40 @@ fun getCefBrowser(url: String): CefBrowser {
                             }
 
                             return false
+                        }
+                    })
+                }
+                .also { client ->
+                    // Add a custom "Export visualization as PDF" entry next to "Print..."
+                    // in the default Chromium context menu (Visualisieren section only).
+                    client.addContextMenuHandler(object : CefContextMenuHandlerAdapter() {
+                        override fun onBeforeContextMenu(
+                            browser: CefBrowser?,
+                            frame: org.cef.browser.CefFrame?,
+                            params: org.cef.callback.CefContextMenuParams?,
+                            model: CefMenuModel?,
+                        ) {
+                            if (model == null) return
+                            if (_APP_STATE.sectionSync != AppSection.VISUALISATION) return
+
+                            val printIndex = model.getIndexOf(CefMenuModel.MenuId.MENU_ID_PRINT)
+                            val insertAt = if (printIndex >= 0) printIndex + 1 else model.count
+                            model.insertSeparatorAt(insertAt)
+                            model.insertItemAt(insertAt + 1, EXPORT_VISUALIZATION_PDF_COMMAND_ID, exportVisualizationPdfMenuLabel())
+                        }
+
+                        override fun onContextMenuCommand(
+                            browser: CefBrowser?,
+                            frame: org.cef.browser.CefFrame?,
+                            params: org.cef.callback.CefContextMenuParams?,
+                            commandId: Int,
+                            eventFlags: Int,
+                        ): Boolean {
+                            if (commandId != EXPORT_VISUALIZATION_PDF_COMMAND_ID) {
+                                return false
+                            }
+                            exportCurrentVisualizationAsPdf()
+                            return true
                         }
                     })
                 }
@@ -359,7 +434,11 @@ suspend fun installWebView(gpuEnabled: Boolean = true) {
 
         val settings = config.cefSettings
         //settings.no_sandbox = true
-        settings.locale = "de"
+        // Matches the app's current language (user preference, or system language as fallback —
+        // see getCurrentLanguage()). Chromium's own UI strings (native context menu, etc.) are
+        // fixed for the lifetime of the embedded browser, so a later in-app language change only
+        // takes effect after the app is restarted.
+        settings.locale = getCurrentLanguage().code
         settings.cache_path = CEF_CACHE_DIR.absolutePathString()
         //settings.root_cache_path = CEF_CACHE_DIR.absolutePathString()
         settings.windowless_rendering_enabled = CEF_WINDOWLESS_RENDERING_ENABLED

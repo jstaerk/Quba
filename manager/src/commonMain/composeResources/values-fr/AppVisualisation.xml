@@ -74,4 +74,6 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppVisualisationViewPdf">PDF</string>
     <string name="AppVisualisationViewSplit">partagé</string>
     <string name="AppVisualisationViewCode">Html/Xml</string>
+
+    <string name="AppVisualisationExportPdfContextMenu">Exporter la visualisation en PDF</string>
 </resources>

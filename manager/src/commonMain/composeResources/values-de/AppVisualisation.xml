@@ -104,4 +104,6 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppVisualisationViewSplit">geteilt</string>
     <string name="AppVisualisationViewCode">Html/Xml</string>
 
+    <string name="AppVisualisationExportPdfContextMenu">Visualisierung als PDF exportieren</string>
+
 </resources>

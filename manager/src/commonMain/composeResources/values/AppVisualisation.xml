@@ -74,4 +74,6 @@ PLEASE CONSIDER THESE NOTES BEFORE STARTING YOUR TRANSLATION WORK!
     <string name="AppVisualisationViewPdf">PDF</string>
     <string name="AppVisualisationViewSplit">split</string>
     <string name="AppVisualisationViewCode">Html/Xml</string>
+
+    <string name="AppVisualisationExportPdfContextMenu">Export visualization as PDF</string>
 </resources>
