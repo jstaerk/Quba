@@ -1,7 +1,7 @@
 # Mustang Quba 2.0.0
 Based on OpenIndex ZUGFeRD-Manager.
 
-<img src="./share/icons/application.svg" align="right" height="125" alt="OpenIndex Quba">
+<img src="./share/icons/logo_small.svg" align="right" height="125" alt="OpenIndex Quba">
 
 🇩🇪 Dies ist eine kostenfreie Desktop-Anwendung für Windows, MacOS & Linux zur Erstellung und Überprüfung von E-Rechnungen im ZUGFeRD-Format.
 
