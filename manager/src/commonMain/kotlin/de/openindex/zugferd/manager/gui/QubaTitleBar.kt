@@ -31,7 +31,7 @@ import de.openindex.zugferd.manager.theme.LocalQubaTypography
 
 // ─────────────────────────────────────────────────────────────────────────────
 // QubaTitleBar — 36h, 3-col grid
-// Left: Q logo + "Quba" + version. Center: command bar placeholder.
+// Left: Q logo + "Quba" + version. Center: empty (command bar planned).
 // Right: action icons + workspace chip.
 // Spec: gradient #FCFCFD → #F4F4F7, hairline bottom.
 // ─────────────────────────────────────────────────────────────────────────────
@@ -71,8 +71,8 @@ fun QubaTitleBar(
                 }
             }
 
-            // Center — ⌘K command bar
-            CommandBar(modifier = Modifier.width(320.dp))
+            // Center — ⌘K command bar: deferred to next release,
+            // see releases/NAECHSTES_RELEASE.md
 
             // Right — actions (toggle)
             Row(
@@ -85,31 +85,6 @@ fun QubaTitleBar(
         }
 
         HorizontalDivider(color = colors.border, thickness = 1.dp)
-    }
-}
-
-@Composable
-private fun CommandBar(modifier: Modifier = Modifier) {
-    val colors = LocalQubaColors.current
-    val typo = LocalQubaTypography.current
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier
-            .height(24.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(colors.surface)
-            .border(1.dp, colors.border, RoundedCornerShape(6.dp))
-            .padding(horizontal = 10.dp),
-    ) {
-        Text(
-            text = "Search or jump to…",
-            style = typo.small.copy(color = colors.text4),
-            modifier = Modifier.weight(1f),
-        )
-        // ⌘K kbd
-        KbdChip(text = "⌘K")
     }
 }
 
